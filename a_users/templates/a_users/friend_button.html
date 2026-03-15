@@ -1,0 +1,38 @@
+<!-- Yeh profile.html mein add karo jahan profile buttons hain -->
+<!-- Profile page pe doosre user ka profile dekh rahe ho toh yeh button dikhega -->
+
+{% if request.user.is_authenticated and profile.user != request.user %}
+<div class="flex gap-2 mt-3">
+  <!-- Chat button -->
+  <a href="{% url 'start-chat' profile.user.username %}"
+    class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white transition-all"
+    style="background:linear-gradient(135deg,#10B981,#22D3EE);border:none;box-shadow:none;">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+    </svg>
+    Message
+  </a>
+
+  <!-- Add/Remove Friend -->
+  {% if is_friend %}
+  <a href="{% url 'remove-friend' profile.user.username %}"
+    onclick="return confirm('Remove friend?')"
+    class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-red-400 transition-all"
+    style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);box-shadow:none;font-weight:500;">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6h12a6 6 0 00-6-6zM21 12h-6"/>
+    </svg>
+    Remove Friend
+  </a>
+  {% else %}
+  <a href="{% url 'add-friend' profile.user.username %}"
+    class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-emerald-400 transition-all"
+    style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);box-shadow:none;font-weight:500;">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6h12a6 6 0 00-6-6z"/>
+    </svg>
+    Add Friend
+  </a>
+  {% endif %}
+</div>
+{% endif %}

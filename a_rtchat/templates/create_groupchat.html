@@ -1,0 +1,69 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4" style="background:#080E1A;">
+  <div class="w-full max-w-md rounded-2xl p-6" style="background:#0F172A;border:1px solid #1E293B;">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+        style="background:linear-gradient(135deg,#10B981,#22D3EE);">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-white font-bold text-lg" style="margin:0;">Create Guild</h1>
+        <p class="text-slate-400 text-sm" style="margin:0;">Start a new community</p>
+      </div>
+    </div>
+
+    <form method="POST" class="flex flex-col gap-4">
+      {% csrf_token %}
+
+      <!-- Guild Name -->
+      <div>
+        <label for="id_groupchat_name" class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5 font-semibold" style="display:block;">Guild Name</label>
+        <input type="text" name="groupchat_name" id="id_groupchat_name"
+          placeholder="Enter guild name..."
+          maxlength="100" autofocus
+          class="w-full px-4 py-3 rounded-xl text-sm text-white"
+          style="background:#1E293B;border:1px solid #334155;outline:none;color:#E2E8F0;">
+        {% if form.groupchat_name.errors %}
+        <p class="text-red-400 text-xs mt-1">{{ form.groupchat_name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Max Members -->
+      <div>
+        <label for="id_max_members" class="block text-xs text-slate-400 uppercase tracking-widest mb-1.5 font-semibold" style="display:block;">
+          Max Members <span class="text-slate-600 normal-case">(optional, min 3)</span>
+        </label>
+        <input type="number" name="max_members" id="id_max_members"
+          placeholder="Unlimited (leave blank)"
+          min="3"
+          class="w-full px-4 py-3 rounded-xl text-sm"
+          style="background:#1E293B;border:1px solid #334155;outline:none;color:#E2E8F0;">
+        <p class="text-slate-600 text-xs mt-1">Leave blank for unlimited members</p>
+        {% if form.max_members.errors %}
+        <p class="text-red-400 text-xs mt-1">{{ form.max_members.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 mt-2">
+        <a href="{% url 'home' %}"
+          class="flex-1 py-3 rounded-xl text-center text-sm text-slate-400 hover:text-white transition-colors"
+          style="background:#1E293B;border:1px solid #334155;font-weight:normal;box-shadow:none;">
+          Cancel
+        </a>
+        <button type="submit"
+          class="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
+          style="background:linear-gradient(135deg,#10B981,#22D3EE);border:none;box-shadow:none;">
+          Create Guild
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

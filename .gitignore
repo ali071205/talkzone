@@ -1,0 +1,35 @@
+# Virtual environment
+venv/
+env/
+
+# Node modules (agar frontend use kar rahe ho)
+node_modules/
+node/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+db.sqlite3
+
+# Environment variables
+.env
+
+# Media files
+media/
+
+# Static collected files
+staticfiles/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/

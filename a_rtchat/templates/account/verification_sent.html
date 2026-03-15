@@ -1,0 +1,23 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4" style="background:#080E1A;">
+  <div class="w-full max-w-sm text-center">
+    <div class="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+      style="background:linear-gradient(135deg,#10B981,#22D3EE);">
+      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <h1 class="text-white font-bold text-2xl mb-2" style="margin-bottom:8px;">Verification sent!</h1>
+    <p class="text-slate-400 text-sm" style="margin:0;">
+      Check your email and click the verification link to complete signup.
+    </p>
+    <div class="mt-6">
+      <a href="{% url 'account_login' %}"
+        style="display:inline-block;padding:10px 24px;border-radius:10px;font-size:14px;background:linear-gradient(135deg,#10B981,#22D3EE);color:white;font-weight:600;text-decoration:none;">
+        Go to Login
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

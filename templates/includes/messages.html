@@ -1,0 +1,73 @@
+<messages>
+  {% if messages %}
+  <div x-data="{ showMessage: false }">
+    {% for message in messages %}
+    <div class="fixed top-20 left-0 right-0 max-w-md mx-auto px-4 z-50">
+      <div x-cloak
+        class="flex items-center gap-3 py-3 px-4 rounded-2xl shadow-2xl text-sm font-medium"
+        role="alert"
+        x-show="showMessage"
+        x-init="setTimeout(() => showMessage = true, 200), setTimeout(() => showMessage = false, 5000)"
+        x-transition:enter="transition duration-500 ease-out"
+        x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition duration-300 ease-in"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+        style="
+          {% if 'success' in message.tags %}
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.4);
+            color: #6ee7b7;
+            box-shadow: 0 0 20px rgba(16,185,129,0.2);
+          {% elif 'error' in message.tags or 'warning' in message.tags %}
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #fca5a5;
+            box-shadow: 0 0 20px rgba(239,68,68,0.2);
+          {% elif 'info' in message.tags %}
+            background: rgba(34,211,238,0.15);
+            border: 1px solid rgba(34,211,238,0.4);
+            color: #67e8f9;
+            box-shadow: 0 0 20px rgba(34,211,238,0.2);
+          {% else %}
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.4);
+            color: #6ee7b7;
+            box-shadow: 0 0 20px rgba(16,185,129,0.2);
+          {% endif %}
+          backdrop-filter: blur(12px);
+        ">
+
+        <!-- Icon -->
+        {% if 'success' in message.tags %}
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        {% elif 'error' in message.tags or 'warning' in message.tags %}
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        {% else %}
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        {% endif %}
+
+        <!-- Message text -->
+        <span class="flex-1">{{ message }}</span>
+
+        <!-- Close button -->
+        <button @click="showMessage = false"
+          class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+          style="background:none;border:none;box-shadow:none;padding:0;cursor:pointer;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</messages>

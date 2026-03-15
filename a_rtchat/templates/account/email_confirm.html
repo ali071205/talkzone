@@ -1,0 +1,39 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4" style="background:#080E1A;">
+  <div class="w-full max-w-sm text-center">
+    <div class="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+      style="background:linear-gradient(135deg,#10B981,#22D3EE);">
+      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <h1 class="text-white font-bold text-2xl mb-2" style="margin-bottom:8px;">Check your email</h1>
+    <p class="text-slate-400 text-sm mb-6" style="margin-bottom:24px;">
+      We sent a verification link to your email.<br>Click it to activate your account.
+    </p>
+    <div class="rounded-2xl p-6" style="background:#0F172A;border:1px solid #1E293B;">
+      {% if confirmation %}
+      <p class="text-slate-300 text-sm mb-4" style="margin-bottom:16px;">
+        Confirming email for <strong class="text-white">{{ confirmation.email_address.email }}</strong>
+      </p>
+      <form method="POST">
+        {% csrf_token %}
+        <button type="submit"
+          style="width:100%;padding:12px;border-radius:10px;font-weight:600;font-size:14px;background:linear-gradient(135deg,#10B981,#22D3EE);border:none;color:white;cursor:pointer;box-shadow:none;">
+          Confirm Email ✓
+        </button>
+      </form>
+      {% else %}
+      <p class="text-slate-400 text-sm" style="margin:0;">
+        Didn't get the email? Check spam folder or
+        <a href="{% url 'account_email' %}" class="text-emerald-400 hover:text-emerald-300">resend it</a>.
+      </p>
+      {% endif %}
+    </div>
+    <div class="mt-4">
+      <a href="{% url 'account_login' %}" class="text-slate-500 text-sm hover:text-slate-300">← Back to login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

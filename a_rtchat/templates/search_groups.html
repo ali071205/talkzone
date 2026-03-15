@@ -1,0 +1,70 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<wrapper class="block max-w-lg mx-auto my-10 px-6">
+    <div class="bg-gray-800 rounded-2xl shadow-2xl p-8">
+
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <h1 class="text-xl font-bold text-white">Find Groups</h1>
+        </div>
+
+        <form method="GET" class="mb-8">
+            <div class="flex gap-3">
+                <input type="text" name="q" value="{{ query }}"
+                    placeholder="Search group name..."
+                    class="flex-1 p-3 bg-gray-700 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-emerald-500">
+                <button type="submit"
+                    class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors">
+                    Search
+                </button>
+            </div>
+        </form>
+
+        {% if query %}
+            {% if groups_with_status %}
+            <ul class="space-y-3">
+                {% for item in groups_with_status %}
+                <li class="flex items-center justify-between p-4 bg-gray-700/50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">
+                            {{ item.group.groupchat_name|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <p class="text-white font-medium">{{ item.group.groupchat_name }}</p>
+                            <p class="text-gray-400 text-xs">{{ item.group.members.count }} members</p>
+                        </div>
+                    </div>
+
+                    {% if item.request %}
+                        {% if item.request.status == 'pending' %}
+                        <span class="px-3 py-1.5 text-xs bg-yellow-500/20 text-yellow-400 rounded-lg">Pending</span>
+                        {% elif item.request.status == 'rejected' %}
+                        <span class="px-3 py-1.5 text-xs bg-red-500/20 text-red-400 rounded-lg">Rejected</span>
+                        {% endif %}
+                    {% else %}
+                    <a href="{% url 'send-join-request' item.group.group_name %}"
+                        class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                        Request to Join
+                    </a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-center text-gray-400 py-8">No groups found for "{{ query }}"</p>
+            {% endif %}
+        {% endif %}
+
+        <div class="mt-6 pt-6 border-t border-gray-700/50">
+            <a href="{% url 'home' %}"
+                class="block text-center text-gray-400 hover:text-white transition-colors text-sm">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</wrapper>
+{% endblock %}

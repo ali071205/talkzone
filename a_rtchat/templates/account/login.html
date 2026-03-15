@@ -1,0 +1,85 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<style>
+  .auth-input {
+    width:100%; background:#1E293B !important; border:1px solid #334155 !important;
+    color:#E2E8F0 !important; border-radius:10px; padding:11px 16px;
+    font-size:14px; outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  .auth-input:focus { border-color:#22D3EE !important; box-shadow:0 0 0 2px rgba(34,211,238,.15) !important; }
+  .auth-input::placeholder { color:#475569 !important; }
+  .auth-btn {
+    width:100%; padding:12px; border-radius:10px; font-weight:600; font-size:14px;
+    background:linear-gradient(135deg,#10B981,#22D3EE); border:none; color:white;
+    cursor:pointer; transition:opacity .2s; box-shadow:none;
+  }
+  .auth-btn:hover { opacity:.9; }
+</style>
+
+<div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4" style="background:#080E1A;">
+  <div class="w-full max-w-sm">
+
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+        style="background:linear-gradient(135deg,#10B981,#22D3EE);">
+        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+          <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+        </svg>
+      </div>
+      <h1 class="text-white font-bold text-2xl" style="margin:0;">Welcome back</h1>
+      <p class="text-slate-400 text-sm mt-1" style="margin:0;">Sign in to TalkZone</p>
+    </div>
+
+    <div class="rounded-2xl p-6" style="background:#0F172A;border:1px solid #1E293B;">
+
+      {% if form.errors %}
+      <div class="mb-4 px-4 py-3 rounded-xl text-sm text-red-300" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);">
+        ❌ Invalid username or password.
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'account_login' %}" class="flex flex-col gap-4">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="/">
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Username</label>
+          <input type="text" name="login"
+            placeholder="your_username"
+            required autofocus
+            value="{{ form.login.value|default:'' }}"
+            class="auth-input">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Password</label>
+          <input type="password" name="password"
+            placeholder="••••••••" required
+            class="auth-input">
+        </div>
+
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 cursor-pointer" style="display:flex;align-items:center;">
+            <input type="checkbox" name="remember"
+              style="width:16px;height:16px;accent-color:#10B981;">
+            <span class="text-sm text-slate-400">Remember me</span>
+          </label>
+          <a href="{% url 'account_reset_password' %}" class="text-xs text-emerald-400 hover:text-emerald-300">
+            Forgot password?
+          </a>
+        </div>
+
+        <button type="submit" class="auth-btn mt-1">Sign In →</button>
+      </form>
+
+      <div class="mt-5 pt-4 text-center" style="border-top:1px solid #1E293B;">
+        <p class="text-slate-500 text-sm" style="margin:0;">
+          Don't have an account?
+          <a href="{% url 'account_signup' %}" class="text-emerald-400 hover:text-emerald-300 font-medium">Create account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

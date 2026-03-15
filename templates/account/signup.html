@@ -1,0 +1,25 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+<h1>{% trans "Sign Up" %}</h1>
+
+<p>
+    {% blocktranslate %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktranslate %}
+</p>
+
+{% if not SOCIALACCOUNT_ONLY %}
+    <form method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {{ redirect_field }}
+        <button type="submit">{% trans "Sign Up" %}</button>
+    </form>
+{% endif %}
+
+{% if SOCIALACCOUNT_ENABLED %}
+    {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+{% endif %}
+{% endblock %}

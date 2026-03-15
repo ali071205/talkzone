@@ -1,0 +1,8 @@
+<div id="online-count" hx-swap-oob="innerHTML"
+  class="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs text-slate-300"
+  style="background:#1E293B;">
+  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" style="box-shadow:0 0 4px #10B981;"></span>
+  {% with count=online_count|add:"-1" %}
+  {% if count > 0 %}{{ count }} online{% else %}0 online{% endif %}
+  {% endwith %}
+</div>

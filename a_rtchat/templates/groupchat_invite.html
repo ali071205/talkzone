@@ -1,0 +1,46 @@
+{% extends "layouts/blank.html" %}
+{% block content %}
+<wrapper class="block max-w-md mx-auto my-16 px-6">
+    <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-600/20 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+
+        <h1 class="text-xl font-bold text-white mb-2">Join "{{ chat_group.groupchat_name }}"</h1>
+        <p class="text-gray-400 text-sm mb-2">{{ chat_group.members.count }} members</p>
+
+        {% if existing_request %}
+            {% if existing_request.status == 'pending' %}
+            <div class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl mb-6">
+                <p class="text-yellow-400 text-sm">⏳ Your join request is pending admin approval.</p>
+            </div>
+            {% elif existing_request.status == 'rejected' %}
+            <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl mb-6">
+                <p class="text-red-400 text-sm">❌ Your request was rejected by admin.</p>
+            </div>
+            {% endif %}
+            <a href="{% url 'home' %}"
+                class="block w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-colors">
+                Go Home
+            </a>
+        {% else %}
+        <p class="text-gray-400 text-sm mb-8">
+            This is a private group. Your request will be sent to the admin for approval.
+        </p>
+        <form method="POST" class="flex gap-3">
+            {% csrf_token %}
+            <a href="{% url 'home' %}"
+                class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-colors text-center">
+                Cancel
+            </a>
+            <button type="submit"
+                class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors">
+                Send Request
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</wrapper>
+{% endblock %}

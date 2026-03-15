@@ -1,0 +1,147 @@
+{% extends "layouts/blank.html" %}
+{% load allauth account %}
+{% block content %}
+<style>
+  .auth-input {
+    width:100%; background:#1E293B !important; border:1px solid #334155 !important;
+    color:#E2E8F0 !important; border-radius:10px; padding:11px 16px;
+    font-size:14px; outline:none; transition:border-color .2s;
+    display:block;
+  }
+  .auth-input:focus { border-color:#22D3EE !important; box-shadow:0 0 0 2px rgba(34,211,238,.15) !important; }
+  .auth-input::placeholder { color:#475569 !important; }
+  .auth-btn {
+    width:100%; padding:12px; border-radius:10px; font-weight:600; font-size:14px;
+    background:linear-gradient(135deg,#10B981,#22D3EE); border:none; color:white;
+    cursor:pointer; transition:opacity .2s; box-shadow:none;
+  }
+  .auth-btn:hover { opacity:.9; }
+  .field-error { color:#f87171; font-size:12px; margin-top:4px; display:block; }
+</style>
+
+<div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4 py-8" style="background:#080E1A;">
+  <div class="w-full max-w-sm">
+
+    <!-- Logo -->
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"
+        style="background:linear-gradient(135deg,#10B981,#22D3EE);">
+        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+          <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+        </svg>
+      </div>
+      <h1 class="text-white font-bold text-2xl" style="margin:0;">Join TalkZone</h1>
+      <p class="text-slate-400 text-sm mt-1" style="margin:0;">Create your account</p>
+    </div>
+
+    <div class="rounded-2xl p-6" style="background:#0F172A;border:1px solid #1E293B;">
+      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+        {% csrf_token %}
+
+        <!-- First + Last Name -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">First Name *</label>
+            <input type="text" name="first_name" placeholder="Ali" required
+              value="{{ form.first_name.value|default:'' }}"
+              class="auth-input">
+            {% if form.first_name.errors %}<span class="field-error">{{ form.first_name.errors.0 }}</span>{% endif %}
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Last Name *</label>
+            <input type="text" name="last_name" placeholder="Khan" required
+              value="{{ form.last_name.value|default:'' }}"
+              class="auth-input">
+            {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Email *</label>
+          <input type="email" name="email" placeholder="your@email.com" required
+            value="{{ form.email.value|default:'' }}"
+            class="auth-input">
+          {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
+        </div>
+
+        <!-- Age -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Age * <span class="text-slate-600 normal-case">(min 13)</span></label>
+          <input type="number" name="age" placeholder="18" min="13" max="120" required
+            value="{{ form.age.value|default:'' }}"
+            class="auth-input">
+          {% if form.age.errors %}<span class="field-error">{{ form.age.errors.0 }}</span>{% endif %}
+        </div>
+
+        <!-- Photo -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Profile Photo <span class="text-slate-600 normal-case">(optional)</span></label>
+          <div class="flex items-center gap-3">
+            <div id="photo-preview" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style="background:#1E293B;border:1px solid #334155;">
+              <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            <label class="flex-1 cursor-pointer px-3 py-2.5 rounded-xl text-sm text-slate-400 text-center hover:text-white transition-colors"
+              style="background:#1E293B;border:1px dashed #334155;">
+              <input type="file" name="photo" accept="image/*" class="hidden" id="photo-input" onchange="previewPhoto(this)">
+              Choose photo
+            </label>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Password *</label>
+          <input type="password" name="password1" placeholder="••••••••" required
+            class="auth-input">
+          {% if form.password1.errors %}<span class="field-error">{{ form.password1.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 uppercase tracking-widest font-semibold" style="display:block;">Confirm Password *</label>
+          <input type="password" name="password2" placeholder="••••••••" required
+            class="auth-input">
+          {% if form.password2.errors %}<span class="field-error">{{ form.password2.errors.0 }}</span>{% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="px-4 py-3 rounded-xl text-sm text-red-300" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);">
+          {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="auth-btn mt-1">Create Account</button>
+      </form>
+
+      <div class="mt-4 text-center">
+        <p class="text-slate-500 text-sm" style="margin:0;">
+          Already have an account?
+          <a href="{% url 'account_login' %}" class="text-emerald-400 hover:text-emerald-300 font-medium">Sign in</a>
+        </p>
+      </div>
+    </div>
+
+    <p class="text-center text-slate-600 text-xs mt-4" style="margin-top:16px;">
+      A verification email will be sent to confirm your account.
+    </p>
+
+  </div>
+</div>
+
+<script>
+function previewPhoto(input){
+  if(input.files && input.files[0]){
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('photo-preview');
+      preview.innerHTML = `<img src="${e.target.result}" class="w-10 h-10 rounded-full object-cover">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}
