@@ -1,0 +1,13 @@
+
+nixPkgs = ["python311"]
+
+cmds = ["pip install -r requirements.txt"]
+
+
+cmds = ["python manage.py collectstatic --noinput"]
+
+cmd = "daphne a_core.asgi:application --port $PORT --bind 0.0.0.0"
+
+
+
+
