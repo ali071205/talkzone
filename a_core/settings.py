@@ -1,5 +1,3 @@
-# settings.py - Poora replace karo
-
 from pathlib import Path
 import os
 import dj_database_url
@@ -38,10 +36,11 @@ INSTALLED_APPS = [
     'a_home',
     'a_users',
     'a_rtchat',
-    'django_browser_reload',
 ]
+
 if DEBUG:
     INSTALLED_APPS += ['django_browser_reload']
+
 SITE_ID = 1
 
 MIDDLEWARE = [
@@ -56,6 +55,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
 ]
+
 if DEBUG:
     MIDDLEWARE += ['django_browser_reload.middleware.BrowserReloadMiddleware']
 
@@ -103,6 +103,8 @@ else:
         },
     }
 
+# Database
+# Local pe SQLite, Production pe PostgreSQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -136,11 +138,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 LOGOUT_REDIRECT_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'          # Home page pe bhejo pehle
-ACCOUNT_SIGNUP_REDIRECT_URL = '/' 
-# Email - Console only, koi email nahi jayegi
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/'
+
+# Email - koi email nahi jayegi
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'TalkZone <noreply@talkzone.com>'
 
@@ -151,11 +153,11 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[TalkZone] '
-# Session - 30 din tak login raho
 
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30    # 30 days
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False   # Browser band hone par logout nahi
-SESSION_SAVE_EVERY_REQUEST = True         # Har request pe session refresh ho
+# Session - 30 din tak login raho
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Production HTTPS security
 if not DEBUG:
