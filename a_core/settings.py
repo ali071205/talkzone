@@ -150,3 +150,13 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[TalkZone] '
+# Session - 30 din tak login raho
+
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30    # 30 days
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False   # Browser band hone par logout nahi
+SESSION_SAVE_EVERY_REQUEST = True         # Har request pe session refresh ho
+
+# Production HTTPS security
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

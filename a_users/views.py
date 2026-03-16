@@ -10,6 +10,7 @@ from .forms import *
 from .models import Profile, FriendRequest
 from allauth.account.views import LoginView
 import logging
+from django.contrib.auth.views import LoginView
 
 logger = logging.getLogger(__name__)
 
@@ -191,3 +192,10 @@ class CustomLoginView(LoginView):
     def form_invalid(self, form):
         logger.error(f"Login failed for {form.cleaned_data.get('login')}: {form.errors}")
         return super().form_invalid(form)
+
+class CustomLoginView(LoginView):
+    def form_valid(self, form):
+        # Remember me - session 30 din tak
+        self.request.session.set_expiry(60 * 60 * 24 * 30)
+        self.request.session.modified = True
+        return super().form_valid(form)
