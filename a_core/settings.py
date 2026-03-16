@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'a_rtchat',
     'django_browser_reload',
 ]
-
+if DEBUG:
+    INSTALLED_APPS += ['django_browser_reload']
 SITE_ID = 1
 
 MIDDLEWARE = [
