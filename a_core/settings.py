@@ -1,6 +1,4 @@
-"""
-Django settings for a_core project.
-"""
+# settings.py - Poora replace karo
 
 from pathlib import Path
 import os
@@ -14,11 +12,14 @@ PROJECT_TITLE = "TalkZone"
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-rj#-z^kx3j+1ay397otg6j8m_8#v^$^$jys6&41vy^&6le)ezc')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*', '.onrender.com']
 
-CSRF_TRUSTED_ORIGINS = ['https://*', 'https://*.onrender.com']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'http://localhost:8000',
+]
 
 INSTALLED_APPS = [
     "channels",
@@ -134,21 +135,17 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'aliahmad071205@gmail.com'
-EMAIL_HOST_PASSWORD = 'xghz jxnh mzik bucy'
-DEFAULT_FROM_EMAIL = 'TalkZone <aliahmad071205@gmail.com>'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'          # Home page pe bhejo pehle
+ACCOUNT_SIGNUP_REDIRECT_URL = '/' 
+# Email - Console only, koi email nahi jayegi
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'TalkZone <noreply@talkzone.com>'
 
 # Allauth
 ACCOUNT_FORMS = {'signup': 'a_users.forms.CustomSignupForm'}
-ACCOUNT_LOGIN_METHODS = {'username'}
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_UNIQUE_EMAIL = True
