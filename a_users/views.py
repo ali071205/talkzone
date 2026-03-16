@@ -10,9 +10,23 @@ from .forms import *
 from .models import Profile, FriendRequest
 from allauth.account.views import LoginView
 import logging
-from django.contrib.auth.views import LoginView
 
 logger = logging.getLogger(__name__)
+
+
+class CustomLoginView(LoginView):
+    template_name = 'account/login.html'
+
+    def form_valid(self, form):
+        # 30 din tak login rahega
+        self.request.session.set_expiry(60 * 60 * 24 * 30)
+        self.request.session.modified = True
+        logger.info(f"Login successful")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        logger.error(f"Login failed: {form.errors}")
+        return super().form_invalid(form)
 
 
 def profile_view(request, username=None):
@@ -30,7 +44,6 @@ def profile_view(request, username=None):
 
     if request.user.is_authenticated and username and profile.user != request.user:
         is_friend = profile.friends.filter(id=request.user.id).exists()
-        # Check if request already sent
         friend_request = FriendRequest.objects.filter(
             sender=request.user, receiver=profile.user, status='pending'
         ).first()
@@ -49,12 +62,10 @@ def send_friend_request(request, username):
     if receiver == request.user:
         return redirect('profile', username=username)
 
-    # Check already friends
     if request.user.profile.friends.filter(id=receiver.id).exists():
         messages.info(request, 'Already friends!')
         return redirect('profile', username=username)
 
-    # Create request
     freq, created = FriendRequest.objects.get_or_create(
         sender=request.user, receiver=receiver
     )
@@ -70,7 +81,6 @@ def handle_friend_request(request, request_id, action):
     freq = get_object_or_404(FriendRequest, id=request_id, receiver=request.user)
 
     if action == 'accept':
-        # Add to friends both ways
         request.user.profile.friends.add(freq.sender)
         freq.sender.profile.friends.add(request.user)
         freq.status = 'accepted'
@@ -101,7 +111,6 @@ def remove_friend(request, username):
     other_user = get_object_or_404(User, username=username)
     request.user.profile.friends.remove(other_user)
     other_user.profile.friends.remove(request.user)
-    # Also delete friend request records
     FriendRequest.objects.filter(
         sender=request.user, receiver=other_user
     ).delete()
@@ -182,20 +191,3 @@ def profile_delete_view(request):
         messages.success(request, 'Account deleted.')
         return redirect('home')
     return render(request, 'a_users/profile_delete.html')
-
-
-class CustomLoginView(LoginView):
-    def form_valid(self, form):
-        logger.info(f"Login successful for {form.cleaned_data.get('login')}")
-        return super().form_valid(form)
-
-    def form_invalid(self, form):
-        logger.error(f"Login failed for {form.cleaned_data.get('login')}: {form.errors}")
-        return super().form_invalid(form)
-
-class CustomLoginView(LoginView):
-    def form_valid(self, form):
-        # Remember me - session 30 din tak
-        self.request.session.set_expiry(60 * 60 * 24 * 30)
-        self.request.session.modified = True
-        return super().form_valid(form)
