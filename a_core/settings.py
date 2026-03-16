@@ -137,8 +137,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 LOGOUT_REDIRECT_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/chat/'          # Home page pe bhejo pehle
-ACCOUNT_SIGNUP_REDIRECT_URL = '/chat/' 
+LOGIN_REDIRECT_URL = '/'          # Home page pe bhejo pehle
+ACCOUNT_SIGNUP_REDIRECT_URL = '/' 
 # Email - Console only, koi email nahi jayegi
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'TalkZone <noreply@talkzone.com>'
