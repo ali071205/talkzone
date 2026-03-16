@@ -3,6 +3,9 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
 from allauth.account.forms import SignupForm
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CustomSignupForm(SignupForm):
@@ -38,22 +41,31 @@ class CustomSignupForm(SignupForm):
     field_order = ['first_name', 'last_name', 'email', 'age', 'photo', 'password1', 'password2']
 
     def save(self, request):
-        user = super().save(request)
-        user.first_name = self.cleaned_data.get('first_name', '')
-        user.last_name = self.cleaned_data.get('last_name', '')
-        user.save()
+        try:
+            logger.info(f"Starting signup for email: {self.cleaned_data.get('email')}")
+            user = super().save(request)
+            logger.info(f"User created: {user.username}")
+            user.first_name = self.cleaned_data.get('first_name', '')
+            user.last_name = self.cleaned_data.get('last_name', '')
+            user.save()
+            logger.info(f"User details saved for {user.username}")
 
-        profile, created = Profile.objects.get_or_create(user=user)
-        profile.age = self.cleaned_data.get('age')
-        # displayname = first name
-        profile.displayname = self.cleaned_data.get('first_name', '')
+            profile, created = Profile.objects.get_or_create(user=user)
+            profile.age = self.cleaned_data.get('age')
+            # displayname = first name
+            profile.displayname = self.cleaned_data.get('first_name', '')
 
-        photo = self.cleaned_data.get('photo')
-        if photo:
-            profile.image = photo
+            photo = self.cleaned_data.get('photo')
+            if photo:
+                profile.image = photo
+                logger.info(f"Photo uploaded for {user.username}")
 
-        profile.save()
-        return user
+            profile.save()
+            logger.info(f"Profile saved for {user.username}")
+            return user
+        except Exception as e:
+            logger.error(f"Error during signup for {self.cleaned_data.get('email', 'unknown')}: {str(e)}")
+            raise
 
 
 class ProfileForm(ModelForm):

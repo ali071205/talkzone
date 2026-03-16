@@ -8,6 +8,10 @@ from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from .forms import *
 from .models import Profile, FriendRequest
+from allauth.account.views import LoginView
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def profile_view(request, username=None):
@@ -177,3 +181,13 @@ def profile_delete_view(request):
         messages.success(request, 'Account deleted.')
         return redirect('home')
     return render(request, 'a_users/profile_delete.html')
+
+
+class CustomLoginView(LoginView):
+    def form_valid(self, form):
+        logger.info(f"Login successful for {form.cleaned_data.get('login')}")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        logger.error(f"Login failed for {form.cleaned_data.get('login')}: {form.errors}")
+        return super().form_invalid(form)
