@@ -11,7 +11,19 @@ import json
 
 @login_required
 def chat_view(request, chatroom_name="public-chat"):
-    chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
+    # Public chat na mile toh automatically bana do
+    chat_group, created = ChatGroup.objects.get_or_create(
+        group_name=chatroom_name,
+        defaults={
+            'groupchat_name': 'Public Chat',
+            'is_private': False,
+        }
+    )
+
+    # User ko automatically member bana do
+    if request.user not in chat_group.members.all():
+        chat_group.members.add(request.user)
+
     chat_messages = chat_group.chat_messages.all()[:50]
     form = ChatMessageCreateForm()
 
@@ -63,22 +75,17 @@ def toggle_reaction(request, message_id):
 
     message = get_object_or_404(GroupMessage, id=message_id)
 
-    # Check if user already has a reaction on this message
     existing = MessageReaction.objects.filter(message=message, user=request.user).first()
 
     if existing:
         if existing.emoji == new_emoji:
-            # Same emoji — remove it
             existing.delete()
         else:
-            # Different emoji — overwrite
             existing.emoji = new_emoji
             existing.save()
     else:
-        # No reaction yet — add new
         MessageReaction.objects.create(message=message, user=request.user, emoji=new_emoji)
 
-    # Build updated reaction data with user names for tooltip
     reaction_data = {}
     for r in message.reactions.all().select_related('user__profile'):
         if r.emoji not in reaction_data:
@@ -170,7 +177,6 @@ def groupchat_invite(request, invite_token):
 @login_required
 def send_join_request(request, chatroom_name):
     chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
-    # Check if group is full
     if chat_group.is_full:
         return render(request, 'join_request_sent.html', {
             'chat_group': chat_group, 'error': 'This guild is full!'
@@ -192,7 +198,6 @@ def handle_join_request(request, request_id, action):
     if request.user != join_request.group.admin:
         raise Http404()
     if action == 'approve':
-        # Check if full before approving
         if not join_request.group.is_full:
             join_request.group.members.add(join_request.user)
             join_request.status = 'approved'
@@ -235,13 +240,11 @@ def delete_message(request, message_id):
 
 @login_required
 def upload_file(request, chatroom_name):
-    """Handle file/image/video/audio uploads via HTTP POST"""
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
     chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
 
-    # Check access
     if chat_group.groupchat_name and request.user not in chat_group.members.all():
         return JsonResponse({'error': 'Not a member'}, status=403)
     if chat_group.is_private and request.user not in chat_group.members.all():
@@ -251,7 +254,6 @@ def upload_file(request, chatroom_name):
     if not file:
         return JsonResponse({'error': 'No file'}, status=400)
 
-    # Detect type
     content_type = file.content_type or ''
     if content_type.startswith('image/'):
         msg_type = 'image'
@@ -262,7 +264,6 @@ def upload_file(request, chatroom_name):
     else:
         msg_type = 'file'
 
-    # Max file size: 20MB
     if file.size > 20 * 1024 * 1024:
         return JsonResponse({'error': 'File too large (max 20MB)'}, status=400)
 
@@ -276,8 +277,7 @@ def upload_file(request, chatroom_name):
 
     from django.template.loader import render_to_string
     from channels.layers import get_channel_layer
-    
-    # Broadcast via WebSocket
+
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         chatroom_name,
@@ -344,7 +344,6 @@ def bot_reply(request, chatroom_name):
 
     chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
 
-    # Get last 8 messages for context
     recent = list(chat_group.chat_messages.filter(
         body__isnull=False, message_type='text'
     ).order_by('-created')[:8])
@@ -356,10 +355,8 @@ def bot_reply(request, chatroom_name):
             role = "assistant" if msg.author.username == 'talkzone_bot' else "user"
             history.append({"role": role, "content": msg.body})
 
-    # Get AI response
     bot_response = ask_groq(user_message, history)
 
-    # Get or create bot user
     bot_user, created = User.objects.get_or_create(username='talkzone_bot')
     if created:
         bot_user.first_name = 'TalkZone'
@@ -368,7 +365,6 @@ def bot_reply(request, chatroom_name):
         from a_users.models import Profile
         Profile.objects.get_or_create(user=bot_user)
 
-    # Save bot message
     from channels.layers import get_channel_layer
     bot_msg = GroupMessage.objects.create(
         group=chat_group,
@@ -377,7 +373,6 @@ def bot_reply(request, chatroom_name):
         message_type='text'
     )
 
-    # Broadcast via WebSocket
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         chatroom_name,
