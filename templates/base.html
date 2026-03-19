@@ -10,16 +10,14 @@
     <title>Project Title</title>
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+    
+    <!-- HTMX - sirf ek baar load karo -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <!-- WebSocket extension - HTMX 1.x ke saath compatible -->
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+    
     <script src="https://unpkg.com/hyperscript.org@0.9.14"></script>
-    {% comment %} <script src="https://unpkg.com/htmx.org@0.9.12/dist/ext/ws.js"></script> {% endcomment %}
-    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
-
     {% django_htmx_script %}
-    {% comment %} <script src="https://unpkg.com/hyperscript.org@0.9.12"></script> {% endcomment %}
-     <script src="https://unpkg.com/htmx.org@2.0.2"></script>
-    <script src="https://unpkg.com/hyperscript.org@0.9.14"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style type="text/tailwindcss">
         [x-cloak] { 
@@ -124,7 +122,6 @@
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="{% block class %}{% endblock %}">
 	
     {% include 'includes/messages.html' %}
-
     {% include 'includes/header.html' %}
 
     {% block layout %}
