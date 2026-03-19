@@ -321,7 +321,7 @@ def ask_groq(user_message, history=None):
                 "max_tokens": 1024,
                 "temperature": 0.7
             },
-            timeout=30
+            timeout= 60
         )
         return res.json()['choices'][0]['message']['content']
     except Exception as e:
