@@ -612,6 +612,54 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }, true);
 });
+/* ── Message Delete - Instant via WebSocket ── */
+function deleteMessage(messageId, csrfToken) {
+  if (!confirm('Delete?')) return;
+
+  // Pehle AJAX se delete karo
+  fetch(`/chat/message/${messageId}/delete/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'Content-Type': 'application/json',
+    },
+  }).then(() => {
+    // Instantly remove from UI
+    const msgEl = document.getElementById('msg-' + messageId);
+    if (msgEl) msgEl.remove();
+
+    // WebSocket se broadcast karo
+    const form = document.getElementById('chat_message_form');
+    if (form && form._ws && form._ws.readyState === WebSocket.OPEN) {
+      form._ws.send(JSON.stringify({
+        type: 'delete_message',
+        message_id: messageId,
+      }));
+    }
+  });
+}
+
+/* ── Handle delete broadcast from other users ── */
+document.body.addEventListener('htmx:wsAfterMessage', function (e) {
+  try {
+    const msg = JSON.parse(e.detail.message);
+
+    // Online status
+    if (msg.type === 'user_online_status') {
+      document.querySelectorAll('.online-dot-' + msg.user_id).forEach(dot => {
+        if (msg.is_online) dot.classList.remove('hidden');
+        else dot.classList.add('hidden');
+      });
+    }
+
+    // Delete message
+    if (msg.type === 'delete_message') {
+      const msgEl = document.getElementById('msg-' + msg.message_id);
+      if (msgEl) msgEl.remove();
+    }
+
+  } catch (err) {}
+});
 
 </script>
 {% endblock %}

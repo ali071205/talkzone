@@ -19,7 +19,6 @@ class ChatRoomConsumer(WebsocketConsumer):
         )
 
         if self.user.is_authenticated:
-            # Remove first to avoid duplicates, then add fresh
             self.chatroom.users_online.remove(self.user)
             self.chatroom.users_online.add(self.user)
             self.update_online_count()
@@ -30,7 +29,6 @@ class ChatRoomConsumer(WebsocketConsumer):
         if self.user.is_authenticated:
             self.chatroom.users_online.remove(self.user)
 
-        # Typing indicator hatao (before group_discard)
         try:
             self.send_typing_indicator(is_typing=False)
         except Exception:
@@ -47,8 +45,28 @@ class ChatRoomConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data = json.loads(text_data)
 
+        # Typing indicator
         if 'typing' in data:
             self.send_typing_indicator(is_typing=data['typing'])
+            return
+
+        # Message delete
+        if data.get('type') == 'delete_message':
+            message_id = data.get('message_id')
+            try:
+                message = GroupMessage.objects.get(id=message_id)
+                if self.user == message.author or self.user == self.chatroom.admin:
+                    message.delete()
+                    # Broadcast delete to all users
+                    async_to_sync(self.channel_layer.group_send)(
+                        self.chatroom_name,
+                        {
+                            "type": "delete_handler",
+                            "message_id": message_id,
+                        }
+                    )
+            except GroupMessage.DoesNotExist:
+                pass
             return
 
         body = data.get('body', '').strip()
@@ -78,6 +96,13 @@ class ChatRoomConsumer(WebsocketConsumer):
             {"message": message, "user": self.user}
         )
         self.send(text_data=html)
+
+    def delete_handler(self, event):
+        # Send delete signal to all connected users
+        self.send(text_data=json.dumps({
+            "type": "delete_message",
+            "message_id": event["message_id"],
+        }))
 
     def send_typing_indicator(self, is_typing):
         async_to_sync(self.channel_layer.group_send)(
@@ -126,7 +151,6 @@ class ChatRoomConsumer(WebsocketConsumer):
         )
         self.send(text_data=html)
 
-        # Send online status update for sidebar dots
         self.send(text_data=json.dumps({
             "type": "user_online_status",
             "user_id": event["changed_user_id"],
