@@ -147,11 +147,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Cloudinary - Media files
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'Talkzone'),
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'dajwynhsq'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY', '677664981677714'),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'pY9bZKjUyFxnaU_pSrw2sBCAnkM'),
 }
-
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'
