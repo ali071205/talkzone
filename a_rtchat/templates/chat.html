@@ -86,8 +86,8 @@
 </style>
 
 {# ── PAGE WRAPPER fills viewport below header ── #}
-<div class="flex gap-2 px-2 sm:px-3 pb-2 sm:pb-3 pt-2 sm:pt-3"
-     style="height: calc(100vh - 84px); background:#080E1A; overflow:hidden;">
+<div class="flex gap-2 px-2 sm:px-3 pb-2 sm:pb-3"
+     style="height: calc(100vh - 64px); background:#080E1A; overflow:hidden;">
 
   {# ════════ LEFT SIDEBAR — lg+ ════════ #}
   <aside class="hidden lg:flex flex-col gap-2 w-56 xl:w-60 flex-shrink-0 overflow-y-auto sidebar-scroll">
@@ -404,18 +404,7 @@ document.body.addEventListener('htmx:wsAfterSend', function(){
   if(input){ input.value = ''; input.focus(); }
 });
 
-/* ── online status dots update ── */
-document.body.addEventListener('htmx:wsAfterMessage', function(e){
-  try {
-    const msg = JSON.parse(e.detail.message);
-    if(msg.type === 'user_online_status'){
-      document.querySelectorAll('.online-dot-'+msg.user_id).forEach(dot=>{
-        if(msg.is_online){ dot.classList.remove('hidden'); }
-        else { dot.classList.add('hidden'); }
-      });
-    }
-  } catch(err){}
-});
+/* ── online status dots update - handled below ── */
 
 /* ── typing indicator ── */
 document.addEventListener('DOMContentLoaded', function(){
