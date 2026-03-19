@@ -569,10 +569,12 @@ document.addEventListener('DOMContentLoaded', function(){
       if(!question) return;
 
       // Show user's message first via WS
-      if(form._ws && form._ws.readyState === WebSocket.OPEN){
-        form._ws.send(JSON.stringify({body: msg}));
-      }
-      input.value = '';
+   if(form._ws && form._ws.readyState === WebSocket.OPEN){
+       form._ws.send(JSON.stringify({body: msg}));
+     setTimeout(() => { input.value = ''; input.focus(); }, 50);
+       } else {
+           input.value = '';
+        }
 
       // Show typing indicator
       const typingDiv = document.getElementById('typing_indicator');
@@ -592,12 +594,21 @@ document.addEventListener('DOMContentLoaded', function(){
       .then(r => r.json())
       .then(data => {
         if(typingDiv) typingDiv.innerHTML = '';
-        if(!data.success) alert('Bot error: ' + (data.error || 'Unknown'));
+        if(!data.success){
+          const f = document.getElementById('chat_message_form');
+         if(f && f._ws && f._ws.readyState === WebSocket.OPEN){
+          f._ws.send(JSON.stringify({body: '🤖 Sorry, I am unable to answer this right now.'}));
+         }
+}
       })
       .catch(() => {
-        if(typingDiv) typingDiv.innerHTML = '';
-        alert('Bot failed to respond.');
-      });
+      if(typingDiv) typingDiv.innerHTML = '';
+        // Alert nahi — bot message dikhao
+         const f = document.getElementById('chat_message_form');
+        if(f && f._ws && f._ws.readyState === WebSocket.OPEN){
+        f._ws.send(JSON.stringify({body: '🤖 Sorry, I am unable to answer this right now. Please try again later.'}));
+  }
+});
     }
   }, true);
 });

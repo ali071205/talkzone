@@ -318,10 +318,10 @@ def ask_groq(user_message, history=None):
             json={
                 "model": "llama-3.3-70b-versatile",
                 "messages": messages,
-                "max_tokens": 1024,
+                "max_tokens": 2048,
                 "temperature": 0.7
             },
-            timeout= 60
+            timeout= 120
         )
         return res.json()['choices'][0]['message']['content']
     except Exception as e:
