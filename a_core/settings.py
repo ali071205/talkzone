@@ -10,14 +10,25 @@ PROJECT_TITLE = "TalkZone"
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-rj#-z^kx3j+1ay397otg6j8m_8#v^$^$jys6&41vy^&6le)ezc')
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
+
+if ENVIRONMENT == 'development':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*', '.onrender.com']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
+    'https://*',
     'http://localhost:8000',
 ]
+
+INTERNAL_IPS = (
+    '127.0.0.1',
+    'localhost:8000',
+)
 
 INSTALLED_APPS = [
     "channels",
@@ -36,6 +47,8 @@ INSTALLED_APPS = [
     'a_home',
     'a_users',
     'a_rtchat',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 if DEBUG:
@@ -104,7 +117,6 @@ else:
     }
 
 # Database
-# Local pe SQLite, Production pe PostgreSQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -133,6 +145,15 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Cloudinary - Media files
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'Talkzone'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY', '677664981677714'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'pY9bZKjUyFxnaU_pSrw2sBCAnkM'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -142,11 +163,9 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/'
 
-# Email - koi email nahi jayegi
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'TalkZone <noreply@talkzone.com>'
 
-# Allauth
 ACCOUNT_FORMS = {'signup': 'a_users.forms.CustomSignupForm'}
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
@@ -154,12 +173,10 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[TalkZone] '
 
-# Session - 30 din tak login raho
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Production HTTPS security
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
