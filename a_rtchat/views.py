@@ -341,6 +341,7 @@ def bot_reply(request, chatroom_name):
     try:
         data = json.loads(request.body)
         user_message = data.get('message', '').strip()
+        full_message = data.get('full_message', '').strip()
     except Exception:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -349,7 +350,22 @@ def bot_reply(request, chatroom_name):
 
     try:
         chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
-        
+
+        # User ka @bot message database mein save karo
+        if full_message:
+            from channels.layers import get_channel_layer as get_cl
+            user_msg = GroupMessage.objects.create(
+                group=chat_group,
+                author=request.user,
+                body=full_message,
+                message_type='text'
+            )
+            cl = get_cl()
+            async_to_sync(cl.group_send)(
+                chatroom_name,
+                {"type": "message_handler", "message_id": user_msg.id}
+            )
+
         recent = list(chat_group.chat_messages.filter(
             body__isnull=False, message_type='text'
         ).order_by('-created')[:8])
