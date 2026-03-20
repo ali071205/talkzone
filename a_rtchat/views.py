@@ -333,7 +333,6 @@ def ask_groq(user_message, history=None):
     except Exception as e:
         return "Sorry, I'm unable to answer this right now. Please try again later."
 
-
 @login_required
 def bot_reply(request, chatroom_name):
     if request.method != 'POST':
@@ -348,41 +347,45 @@ def bot_reply(request, chatroom_name):
     if not user_message:
         return JsonResponse({'error': 'Empty message'}, status=400)
 
-    chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
+    try:
+        chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
+        
+        recent = list(chat_group.chat_messages.filter(
+            body__isnull=False, message_type='text'
+        ).order_by('-created')[:8])
+        recent.reverse()
 
-    recent = list(chat_group.chat_messages.filter(
-        body__isnull=False, message_type='text'
-    ).order_by('-created')[:8])
-    recent.reverse()
+        history = []
+        for msg in recent:
+            if msg.body and not msg.body.startswith('@bot'):
+                role = "assistant" if msg.author.username == 'talkzone_bot' else "user"
+                history.append({"role": role, "content": msg.body})
 
-    history = []
-    for msg in recent:
-        if msg.body and not msg.body.startswith('@bot'):
-            role = "assistant" if msg.author.username == 'talkzone_bot' else "user"
-            history.append({"role": role, "content": msg.body})
+        bot_response = ask_groq(user_message, history)
 
-    bot_response = ask_groq(user_message, history)
+        bot_user, created = User.objects.get_or_create(username='talkzone_bot')
+        if created:
+            bot_user.first_name = 'TalkZone'
+            bot_user.last_name = 'AI'
+            bot_user.save()
+            from a_users.models import Profile
+            Profile.objects.get_or_create(user=bot_user)
 
-    bot_user, created = User.objects.get_or_create(username='talkzone_bot')
-    if created:
-        bot_user.first_name = 'TalkZone'
-        bot_user.last_name = 'AI'
-        bot_user.save()
-        from a_users.models import Profile
-        Profile.objects.get_or_create(user=bot_user)
+        from channels.layers import get_channel_layer
+        bot_msg = GroupMessage.objects.create(
+            group=chat_group,
+            author=bot_user,
+            body=f"🤖 {bot_response}",
+            message_type='text'
+        )
 
-    from channels.layers import get_channel_layer
-    bot_msg = GroupMessage.objects.create(
-        group=chat_group,
-        author=bot_user,
-        body=f"🤖 {bot_response}",
-        message_type='text'
-    )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            chatroom_name,
+            {"type": "message_handler", "message_id": bot_msg.id}
+        )
 
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        chatroom_name,
-        {"type": "message_handler", "message_id": bot_msg.id}
-    )
+        return JsonResponse({'success': True})
 
-    return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=200)
