@@ -321,11 +321,17 @@ def ask_groq(user_message, history=None):
                 "max_tokens": 1024,
                 "temperature": 0.7
             },
-            timeout= 120
+            timeout=60
         )
-        return res.json()['choices'][0]['message']['content']
+        data = res.json()
+        if 'choices' in data and len(data['choices']) > 0:
+            return data['choices'][0]['message']['content']
+        else:
+            return "Sorry, I'm unable to answer this right now. Please try again later."
+    except http_requests.exceptions.Timeout:
+        return "Sorry, I'm unable to answer this right now. Please try again later."
     except Exception as e:
-        return f"Sorry, I couldn't process that. Error: {str(e)}"
+        return "Sorry, I'm unable to answer this right now. Please try again later."
 
 
 @login_required
