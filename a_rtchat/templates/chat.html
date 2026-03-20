@@ -568,13 +568,9 @@ document.addEventListener('DOMContentLoaded', function(){
       const question = msg.slice(5).trim();
       if(!question) return;
 
-      // Show user's message first via WS
-      if(form._ws && form._ws.readyState === WebSocket.OPEN){
-        form._ws.send(JSON.stringify({body: msg}));
-        setTimeout(() => { input.value = ''; input.focus(); }, 50);
-      } else {
-        input.value = '';
-      }
+      // Input clear karo - message bot_reply API se save hoga
+      input.value = '';
+      input.focus();
 
       // Show typing indicator
       const typingDiv = document.getElementById('typing_indicator');
