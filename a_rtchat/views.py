@@ -7,7 +7,7 @@ from .forms import ChatMessageCreateForm, NewGroupForm as GroupChatCreateForm, C
 from django.http import Http404, JsonResponse
 import shortuuid
 import json
-
+import threading
 
 @login_required
 def chat_view(request, chatroom_name="public-chat"):
@@ -332,8 +332,7 @@ def ask_groq(user_message, history=None):
         return "Sorry, I'm unable to answer this right now. Please try again later."
     except Exception as e:
         return "Sorry, I'm unable to answer this right now. Please try again later."
-
-@login_required
+@login_required  
 def bot_reply(request, chatroom_name):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
@@ -348,60 +347,65 @@ def bot_reply(request, chatroom_name):
     if not user_message:
         return JsonResponse({'error': 'Empty message'}, status=400)
 
-    try:
-        chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
+    chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
 
-        # User ka @bot message database mein save karo
-        if full_message:
-            from channels.layers import get_channel_layer as get_cl
-            user_msg = GroupMessage.objects.create(
-                group=chat_group,
-                author=request.user,
-                body=full_message,
-                message_type='text'
-            )
-            cl = get_cl()
-            async_to_sync(cl.group_send)(
-                chatroom_name,
-                {"type": "message_handler", "message_id": user_msg.id}
-            )
-
-        recent = list(chat_group.chat_messages.filter(
-            body__isnull=False, message_type='text'
-        ).order_by('-created')[:8])
-        recent.reverse()
-
-        history = []
-        for msg in recent:
-            if msg.body and not msg.body.startswith('@bot'):
-                role = "assistant" if msg.author.username == 'talkzone_bot' else "user"
-                history.append({"role": role, "content": msg.body})
-
-        bot_response = ask_groq(user_message, history)
-
-        bot_user, created = User.objects.get_or_create(username='talkzone_bot')
-        if created:
-            bot_user.first_name = 'TalkZone'
-            bot_user.last_name = 'AI'
-            bot_user.save()
-            from a_users.models import Profile
-            Profile.objects.get_or_create(user=bot_user)
-
-        from channels.layers import get_channel_layer
-        bot_msg = GroupMessage.objects.create(
+    # User message save karo
+    if full_message:
+        from channels.layers import get_channel_layer as get_cl
+        user_msg = GroupMessage.objects.create(
             group=chat_group,
-            author=bot_user,
-            body=f"🤖 {bot_response}",
+            author=request.user,
+            body=full_message,
             message_type='text'
         )
-
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
+        cl = get_cl()
+        async_to_sync(cl.group_send)(
             chatroom_name,
-            {"type": "message_handler", "message_id": bot_msg.id}
+            {"type": "message_handler", "message_id": user_msg.id}
         )
 
-        return JsonResponse({'success': True})
+    # Turant response do — bot background mein chalega
+    def run_bot():
+        try:
+            recent = list(chat_group.chat_messages.filter(
+                body__isnull=False, message_type='text'
+            ).order_by('-created')[:8])
+            recent.reverse()
 
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=200)
+            history = []
+            for msg in recent:
+                if msg.body and not msg.body.startswith('@bot'):
+                    role = "assistant" if msg.author.username == 'talkzone_bot' else "user"
+                    history.append({"role": role, "content": msg.body})
+
+            bot_response = ask_groq(user_message, history)
+
+            bot_user, created = User.objects.get_or_create(username='talkzone_bot')
+            if created:
+                bot_user.first_name = 'TalkZone'
+                bot_user.last_name = 'AI'
+                bot_user.save()
+                from a_users.models import Profile
+                Profile.objects.get_or_create(user=bot_user)
+
+            from channels.layers import get_channel_layer
+            bot_msg = GroupMessage.objects.create(
+                group=chat_group,
+                author=bot_user,
+                body=f"🤖 {bot_response}",
+                message_type='text'
+            )
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                chatroom_name,
+                {"type": "message_handler", "message_id": bot_msg.id}
+            )
+        except Exception:
+            pass
+
+    thread = threading.Thread(target=run_bot)
+    thread.daemon = True
+    thread.start()
+
+    return JsonResponse({'success': True})
