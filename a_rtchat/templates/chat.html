@@ -568,9 +568,13 @@ document.addEventListener('DOMContentLoaded', function(){
       const question = msg.slice(5).trim();
       if(!question) return;
 
-      // Input clear karo - message bot_reply API se save hoga
-      input.value = '';
-      input.focus();
+      // Show user's message first via WS
+      if(form._ws && form._ws.readyState === WebSocket.OPEN){
+        form._ws.send(JSON.stringify({body: msg}));
+        setTimeout(() => { input.value = ''; input.focus(); }, 50);
+      } else {
+        input.value = '';
+      }
 
       // Show typing indicator
       const typingDiv = document.getElementById('typing_indicator');
@@ -587,7 +591,10 @@ document.addEventListener('DOMContentLoaded', function(){
         },
         body: JSON.stringify({message: question, full_message: msg})
       })
-      .then(r => r.json())
+      .then(r => {
+        if(!r.ok) throw new Error('Server error: ' + r.status);
+        return r.json();
+      })
       .then(data => {
         if(typingDiv) typingDiv.innerHTML = '';
         if(!data.success){
