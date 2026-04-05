@@ -401,8 +401,23 @@ def bot_reply(request, chatroom_name):
                 chatroom_name,
                 {"type": "message_handler", "message_id": bot_msg.id}
             )
-        except Exception:
-            pass
+        except Exception as e:
+            try:
+                bot_user, _ = User.objects.get_or_create(username='talkzone_bot')
+                from channels.layers import get_channel_layer
+                error_msg = GroupMessage.objects.create(
+                    group=chat_group,
+                    author=bot_user,
+                    body="🤖 Sorry, I experienced a technical issue and couldn't process your request. Please try again later.",
+                    message_type='text'
+                )
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    chatroom_name,
+                    {"type": "message_handler", "message_id": error_msg.id}
+                )
+            except Exception:
+                pass
 
     thread = threading.Thread(target=run_bot)
     thread.daemon = True
