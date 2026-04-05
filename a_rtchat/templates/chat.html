@@ -388,15 +388,69 @@
 
 {% block javascript %}
 <script>
-/* ── scroll ── */
-function scrollToBottom(){
-  const c = document.getElementById('chat_container');
-  if(c){ c.scrollTop = c.scrollHeight; }
+/* ── Auto Scroll System ── */
+const chatContainer = document.getElementById('chat_container');
+
+function scrollToBottom(smooth){
+  if(!chatContainer) return;
+  chatContainer.scrollTo({
+    top: chatContainer.scrollHeight,
+    behavior: smooth ? 'smooth' : 'instant'
+  });
 }
-// Scroll on load + after new messages
-scrollToBottom();
-// Also scroll when images load
+
+// Check if user is near the bottom (within 150px)
+function isNearBottom(){
+  if(!chatContainer) return true;
+  return chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 150;
+}
+
+// Scroll on initial load
+scrollToBottom(false);
 window.addEventListener('load', scrollToBottom);
+
+// Auto-scroll when new messages arrive via WebSocket
+document.body.addEventListener('htmx:wsAfterMessage', function(){
+  // Small delay to let DOM update
+  setTimeout(function(){
+    if(isNearBottom()) scrollToBottom(true);
+    updateScrollBtn();
+  }, 100);
+});
+
+// Auto-scroll when images/videos inside chat load
+if(chatContainer){
+  const observer = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      m.addedNodes.forEach(function(node){
+        if(node.nodeType !== 1) return;
+        const media = node.querySelectorAll ? node.querySelectorAll('img, video') : [];
+        media.forEach(function(el){
+          el.addEventListener('load', function(){ if(isNearBottom()) scrollToBottom(true); });
+          el.addEventListener('loadeddata', function(){ if(isNearBottom()) scrollToBottom(true); });
+        });
+      });
+    });
+  });
+  observer.observe(chatContainer, { childList: true, subtree: true });
+}
+
+// ── Scroll-to-bottom button (appears when user scrolls up) ──
+(function(){
+  if(!chatContainer) return;
+  const btn = document.createElement('button');
+  btn.id = 'scroll-to-bottom-btn';
+  btn.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>';
+  btn.style.cssText = 'position:absolute;bottom:80px;right:16px;z-index:50;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#10B981,#22D3EE);border:none;box-shadow:0 2px 12px rgba(16,185,129,.3);display:none;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:opacity .2s,transform .2s;';
+  btn.onclick = function(){ scrollToBottom(true); };
+  chatContainer.parentElement.style.position = 'relative';
+  chatContainer.parentElement.appendChild(btn);
+
+  window.updateScrollBtn = function(){
+    btn.style.display = isNearBottom() ? 'none' : 'flex';
+  };
+  chatContainer.addEventListener('scroll', updateScrollBtn);
+})();
 
 /* ── input reset after send ── */
 document.body.addEventListener('htmx:wsAfterSend', function(){
