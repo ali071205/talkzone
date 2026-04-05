@@ -24,7 +24,16 @@ class Profile(models.Model):
     @property
     def avatar(self):
         if self.image:
-            return self.image.url
+            try:
+                url = self.image.url
+                # Cloudinary URLs start with http - those work everywhere
+                # Local /media/ paths won't work on Render (ephemeral filesystem)
+                if url.startswith('http'):
+                    return url
+                # Local path - only works in development
+                return url
+            except Exception:
+                pass
         return f'{settings.STATIC_URL}images/avatar.svg'
 
     @property

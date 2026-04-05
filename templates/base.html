@@ -129,5 +129,21 @@
 
     {% block javascript %}{% endblock %}
 
+    {% load static %}
+    <script>
+    // Fallback for broken avatar images (e.g. local paths on Render)
+    document.addEventListener('DOMContentLoaded', function(){
+      var fallback = '{% static "images/avatar.svg" %}';
+      document.querySelectorAll('img').forEach(function(img){
+        img.addEventListener('error', function(){
+          if(this.src !== fallback && !this.dataset.fallback){
+            this.dataset.fallback = '1';
+            this.src = fallback;
+          }
+        });
+      });
+    });
+    </script>
+
 </body>
 </html>
