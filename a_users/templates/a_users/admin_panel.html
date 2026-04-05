@@ -65,6 +65,18 @@
     font-size: 11px;
     font-weight: 600;
   }
+  .msg-success {
+    background: rgba(16,185,129,.1);
+    border: 1px solid rgba(16,185,129,.2);
+  }
+  .msg-warning {
+    background: rgba(234,179,8,.1);
+    border: 1px solid rgba(234,179,8,.2);
+  }
+  .msg-default {
+    background: rgba(34,211,238,.1);
+    border: 1px solid rgba(34,211,238,.2);
+  }
 </style>
 
 <div class="max-w-5xl mx-auto px-4 py-6">
@@ -72,8 +84,7 @@
   <!-- Messages -->
   {% for message in messages %}
   <div class="mb-4 px-4 py-3 rounded-xl text-sm
-    {% if message.tags == 'success' %}text-emerald-300{% elif message.tags == 'warning' %}text-yellow-300{% else %}text-slate-300{% endif %}"
-    style="{% if message.tags == 'success' %}background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);{% elif message.tags == 'warning' %}background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.2);{% else %}background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);{% endif %}">
+    {% if message.tags == 'success' %}text-emerald-300 msg-success{% elif message.tags == 'warning' %}text-yellow-300 msg-warning{% else %}text-slate-300 msg-default{% endif %}">
     {{ message }}
   </div>
   {% endfor %}
@@ -135,13 +146,11 @@
     </p>
 
     {% for u in users %}
-    <div class="user-row {% if u.profile.is_banned %}opacity-60{% endif %}"
-      style="{% if not forloop.last %}border-bottom:1px solid #1E293B;{% endif %}">
+    <div class="user-row {% if u.profile.is_banned %}opacity-60{% endif %} {% if not forloop.last %}border-b border-[#1E293B]{% endif %}">
 
       <!-- Avatar -->
       <div class="relative flex-shrink-0">
-        <img src="{{ u.profile.avatar }}" class="w-10 h-10 rounded-full object-cover"
-          style="{% if u.profile.is_banned %}filter:grayscale(100%);{% endif %}">
+        <img src="{{ u.profile.avatar }}" class="w-10 h-10 rounded-full object-cover {% if u.profile.is_banned %}grayscale{% endif %}">
         {% if u.online_in_groups.exists %}
         <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#0F172A]"
           style="box-shadow:0 0 5px #10B981;"></span>
