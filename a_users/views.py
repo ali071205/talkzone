@@ -66,10 +66,25 @@ def send_friend_request(request, username):
         messages.info(request, 'Already friends!')
         return redirect('profile', username=username)
 
+    # Check if receiver has already sent a request to sender
+    existing_req = FriendRequest.objects.filter(sender=receiver, receiver=request.user, status='pending').first()
+    if existing_req:
+        # Auto-accept because they already sent you a request
+        request.user.profile.friends.add(receiver)
+        receiver.profile.friends.add(request.user)
+        existing_req.status = 'accepted'
+        existing_req.save()
+        messages.success(request, f'You are now friends with {receiver.profile.name}! 🎉')
+        return redirect('profile', username=username)
+
     freq, created = FriendRequest.objects.get_or_create(
         sender=request.user, receiver=receiver
     )
-    if created:
+    if not created and freq.status in ['rejected', 'accepted']:
+        freq.status = 'pending'
+        freq.save()
+        messages.success(request, f'Friend request sent to {receiver.profile.name}!')
+    elif created:
         messages.success(request, f'Friend request sent to {receiver.profile.name}!')
     else:
         messages.info(request, 'Request already sent.')

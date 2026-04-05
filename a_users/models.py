@@ -27,6 +27,11 @@ class Profile(models.Model):
             return self.image.url
         return f'{settings.STATIC_URL}images/avatar.svg'
 
+    @property
+    def pending_requests_count(self):
+        return self.user.received_requests.filter(status='pending').count()
+
+
 
 class FriendRequest(models.Model):
     STATUS_CHOICES = [
