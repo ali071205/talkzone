@@ -37,6 +37,15 @@ def on_user_login(sender, request, user, **kwargs):
     name = user.profile.name if hasattr(user, 'profile') else user.username
     messages.success(request, f'✅ You have successfully logged in to TalkZone, {name}!')
 
+    # Save login IP
+    if hasattr(user, 'profile'):
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+        if not ip:
+            ip = request.META.get('REMOTE_ADDR', '')
+        if ip:
+            user.profile.last_login_ip = ip
+            user.profile.save(update_fields=['last_login_ip'])
+
     # Kick other sessions
     from django.contrib.sessions.models import Session
     from django.utils import timezone

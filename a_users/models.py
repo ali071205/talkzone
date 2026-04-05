@@ -10,6 +10,9 @@ class Profile(models.Model):
     info = models.TextField(null=True, blank=True)
     age = models.PositiveIntegerField(null=True, blank=True)
     friends = models.ManyToManyField(User, related_name='friend_of', blank=True)
+    is_banned = models.BooleanField(default=False)
+    ban_reason = models.CharField(max_length=200, null=True, blank=True)
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
 
     def __str__(self):
         return str(self.user)
