@@ -13,11 +13,11 @@ urlpatterns = [
     path('profile/', include('a_users.urls')),
     path('@<username>/', profile_view, name="profile"),
 
-    # Secret Admin Panel
-    path('05-08-2009/', admin_panel_view, name='admin-panel'),
-    path('05-08-2009/ban/<int:user_id>/', admin_ban_user, name='admin-ban-user'),
-    path('05-08-2009/delete/<int:user_id>/', admin_delete_user, name='admin-delete-user'),
-    path('05-08-2009/staff/<int:user_id>/', admin_make_staff, name='admin-make-staff'),
+    # Secret Admin Panel — only accessible if you know both codes
+    path('05-08-2009/07-12-2005/', admin_panel_view, name='admin-panel'),
+    path('05-08-2009/07-12-2005/ban/<int:user_id>/', admin_ban_user, name='admin-ban-user'),
+    path('05-08-2009/07-12-2005/delete/<int:user_id>/', admin_delete_user, name='admin-delete-user'),
+    path('05-08-2009/07-12-2005/staff/<int:user_id>/', admin_make_staff, name='admin-make-staff'),
 ]
 
 if settings.DEBUG:
